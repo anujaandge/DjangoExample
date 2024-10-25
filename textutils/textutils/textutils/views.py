@@ -37,8 +37,8 @@ def analyze(request):
         params={'purpose':'New Line Removed', 'analyzed_text':analyzed}
         djtext=analyzed   
     
-    if not(removepunc=='on' and fullcaps=='on' and newlineremover=='on'):
-        return render(request,'error.html')
+    if (removepunc!='on' and fullcaps!='on' and newlineremover!='on'):
+         return render(request,'error.html')
     
     return render(request, 'analyze.html', params)    
 
