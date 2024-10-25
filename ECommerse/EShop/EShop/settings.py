@@ -131,12 +131,12 @@ MEDIA_URL='/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# settings.py
+# Email settings for sending email notifications
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'   # Or your SMTP server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'goreanuja6@gmail.com' #your email address here
-EMAIL_HOST_PASSWORD = 'zadg llcl ugwd csip'    #your passward here
+EMAIL_HOST_USER = 'your email address' #your email address here
+EMAIL_HOST_PASSWORD = 'your password'    #your password here
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
