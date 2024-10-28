@@ -8,11 +8,6 @@ from math import ceil
 # Create your views here.
 
 def index(request):
-    # products = Product.objects.all()
-    # print(products)
-    # n = len(products)
-    # nSlides = n//4 + ceil((n/4)-(n//4))
-
     allProds = []
     catprods = Product.objects.values('category', 'id')
     cats = {item['category'] for item in catprods}
@@ -21,13 +16,8 @@ def index(request):
         n = len(prod)
         nSlides = n // 4 + ceil((n / 4) - (n // 4))
         allProds.append([prod, range(1, nSlides), nSlides])
-
-    # params = {'no_of_slides':nSlides, 'range': range(1,nSlides),'product': products}
-    # allProds = [[products, range(1, nSlides), nSlides],
-    #             [products, range(1, nSlides), nSlides]]
     params = {'allProds':allProds}
     return render(request, 'shop/index.html', params)
-
 
 def about(request):
     return render(request, 'shop/about.html')
@@ -47,7 +37,7 @@ def contact(request):
             subject="New Contact Request - Mayinsoft.com",
             message=admin_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['goreanuja6@gmail.com'],  # Replace with your admin email
+            recipient_list=['your admin email'],  # Replace with your admin email
         )
         #confirmation Email to User
         user_message = f"Hello {name},\n\nThank you for contacting Mayinsoft.com. We have received your message:\n\n{desc}\n\nWe will get back to you shortly.\n\nBest,\nMayinsoft.com Team"
