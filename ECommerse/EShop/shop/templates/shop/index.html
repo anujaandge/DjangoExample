@@ -110,32 +110,32 @@
     }
     else{
       cart= JSON.parse(localStorage.getItem('cart'));
-      document.getElementById('cart').innerHTML=Object.keys(cart).length;
+      updateCart(cart);
+      
     }
     //jQuery starts here//
     //if add to cart button is clicked add/increment the item
-    $('.cart').click(function(){
-      //console.log('clicked');
-      var idStr= this.id.toString();
-      //console.log(idStr);
-      if(cart[idStr]!= undefined) {
-        cart[idStr] = cart[idStr]+1;
-      }
-      else{
+    $(document).on('click', '.cart', function() {
+      var idStr = this.id.toString();
+      if (cart[idStr] != undefined) {
+        cart[idStr] = cart[idStr] + 1;
+      } else {
         cart[idStr] = 1;
       }
-      //console.log(cart);
       updateCart(cart);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      document.getElementById('cart').innerHTML=Object.keys(cart).length;
     });
 
     //add popover to cart
-    $('#popcart').popover();
-    
-    updatePopover(cart);
+    // Initialize popover with click trigger only
+    $('#popcart').popover({
+      trigger: 'click',
+      html: true,
+      content: function() {
+        return getPopoverContent(cart);
+      }
+    });
+    //updatePopover(cart);
     function updatePopover(cart){
-        console.log("we are inside updatePopover");
         var popStr="";
         popStr =popStr +"</h5> Cart for your items in my shopping cart"+'<br>';
         var i=1;
@@ -144,28 +144,53 @@
           popStr=popStr+ document.getElementById('name'+item).innerHTML.slice(0, 19) + "...Qty: "+cart[item]+ '<br>';
           i=i+1;
         }
-        console.log(popStr);
+        popStr = popStr + "</div> <a href='/shop/checkout'><button class='btn btn-primary' id ='checkout'>Checkout</button></a> <button class='btn btn-primary' onclick='clearCart()' id ='clearCart'>Clear Cart</button>     "
+
         document.getElementById("popcart").setAttribute('data-content', popStr);
         $('#popcart').popover('show');
     }
 
-    function updateCart(cart){
-        for (var item in cart){
-          document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>";
-        } 
-        localStorage.setItem('cart', JSON.stringify(cart));
-      document.getElementById('cart').innerHTML=Object.keys(cart).length;
-      console.log(cart);
+    function clearCart() {
+      cart = JSON.parse(localStorage.getItem('cart'));
+      for (var item in cart) {
+          document.getElementById('div' + item).innerHTML = '<button id="' + item + '" class="btn btn-primary cart">Add To Cart</button>'
+      }
+      localStorage.clear();
+      cart = {};
+      updateCart(cart);
+    }
+  
+
+    function updateCart(cart) {
+      var sum = 0;
+      for (var item in cart) {
+        sum = sum + cart[item];
+        if (cart[item] > 0) {
+          document.getElementById('div' + item).innerHTML = 
+            "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> " +
+            "<span id='val" + item + "'>" + cart[item] + "</span> " +
+            "<button id='plus" + item + "' class='btn btn-primary plus'>+</button>";
+        } else {
+          document.getElementById('div' + item).innerHTML = "<button id='" + item + "' class='btn btn-primary cart'>Add To Cart</button>";
+          delete cart[item];
+        }
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      document.getElementById('cart').innerHTML = sum;
       updatePopover(cart);
     }
-    //on click minus and plus button
-  $('.divpr').on('click','button.minus',function(){
-    a=this.id.slice(7,)
-    cart['pr'+a]=cart['pr'+a]-1;
-    cart['pr' + a] = Math.max(0, cart['pr' + a]);
-    document.getElementById('valpr' + a).innerHTML = cart['pr' + a];
-    updateCart(cart);
-  });
+
+    $('.divpr').on('click', 'button.minus', function() {
+      var a = this.id.slice(7);
+      cart['pr' + a] = cart['pr' + a] - 1;
+      if (cart['pr' + a] <= 0) {
+        delete cart['pr' + a];
+        document.getElementById('divpr' + a).innerHTML = "<button id='pr" + a + "' class='btn btn-primary cart'>Add To Cart</button>";
+      } else {
+        document.getElementById('valpr' + a).innerHTML = cart['pr' + a];
+      }
+      updateCart(cart);
+    });
   $('.divpr').on('click','button.plus',function(){
     a=this.id.slice(6,)
     cart['pr'+a]=cart['pr'+a]+1;
