@@ -60,6 +60,8 @@
 
 {% block js %} 
 <script>
+    
+
     //find out the cart item from localstorage
     if(localStorage.getItem('cart') == null)
     {
@@ -67,17 +69,79 @@
     }
     else{
       cart= JSON.parse(localStorage.getItem('cart'));
-      
     }
     console.log(cart);
-    for (item in cart){
-        let name = cart[item][1];
-        let  qty = cart[item][0];
-        mystr=`<li class="list-group-item d-flex justify-content-between align-items-center">
-                  ${name}
-                  <span class="badge badge-primary badge-pill">${qty}</span>
-               </li>`
-        $('#items').append(mystr);       
+    
+    function renderCart() {
+        var sum = 0;
+        if ($.isEmptyObject(cart)) {
+        // If object is empty
+            mystr = "<p>Your cart is empty, please add some items before checking out ! </p>"
+            $('#items').append(mystr);
+        }
+        else{
+            for (item in cart){
+                let name = cart[item][1];
+                let  qty = cart[item][0];
+                sum = sum + qty;
+                mystr=`<li class="list-group-item d-flex justify-content-between align-items-center">
+                          ${name}
+                        <div >
+                            <button class="btn btn-primary minus" data-item="${item}">-</button>
+                            <span id="val-${item}">${qty}</span>
+                            <button class="btn btn-primary plus" data-item="${item}">+</button>
+                        </div>
+                       </li>`
+                $('#items').append(mystr);       
+            }
+        }
+        document.getElementById('cart').innerHTML = sum;
+    
+    
     }
-</script>    
+    $(document).ready(function() {
+        renderCart(); // Initial render
+
+        // Event delegation for minus button
+        $('#items').on('click', '.minus', function() {
+            let cart = JSON.parse(localStorage.getItem('cart'));
+            const item = $(this).data('item');
+            
+            if (cart[item][0] > 1) {
+                cart[item][0]--;
+            } else {
+                delete cart[item];
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            $(`#val-${item}`).text(cart[item] ? cart[item][0] : 0); // Update quantity directly
+            updateCartSum();
+            
+        });
+
+        // Event delegation for plus button
+        $('#items').on('click', '.plus', function() {
+            let cart = JSON.parse(localStorage.getItem('cart'));
+            const item = $(this).data('item');
+            
+            cart[item][0]++;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            $(`#val-${item}`).text(cart[item][0]); // Update quantity directly
+            updateCartSum();
+            
+        });
+        // Function to update the total cart count
+        function updateCartSum() {
+            let sum = 0;
+            for (let item in cart) {
+                sum += cart[item][0];
+            }
+            document.getElementById('cart').innerHTML = sum;
+            
+        }
+        
+        
+    });
+    
+</script> 
 {% endblock%}
