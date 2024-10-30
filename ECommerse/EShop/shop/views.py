@@ -2,7 +2,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.mail import send_mail
-from .models import Product, Contact
+from .models import Product, Contact, Order
 
 from math import ceil
 # Create your views here.
@@ -66,4 +66,24 @@ def productView(request, myid):
     return render(request, 'shop/prodView.html',{'product':product[0]})
 
 def checkout(request):
+    if request.method=="POST":
+        items_json = request.POST.get('itemsJson', '')
+        name=request.POST.get('name','')
+        email=request.POST.get('email','')
+        address=request.POST.get('address1','') + request.POST.get(' address2','')
+        city=request.POST.get('city','')
+        state=request.POST.get('state','')
+        zip_code=request.POST.get('zip_code','')
+        phone=request.POST.get('phone','')
+        
+        order=Order(items_json=items_json,name=name, email=email, phone=phone, address=address,city=city, state=state,zip_code=zip_code)
+        order.save()
+        thank=True
+        id=order.order_id
+        print(id)
+        # return redirect('checkout_success',{'id':id})  
+        return render(request, 'shop/checkout.html', {'thank':thank, 'id':id})
     return render(request, 'shop/checkout.html')
+
+def checkout_success(request):
+    return render(request, 'shop/checkout_success.html')
