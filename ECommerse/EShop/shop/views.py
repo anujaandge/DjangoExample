@@ -2,9 +2,10 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.mail import send_mail
-from .models import Product, Contact, Order
+from .models import Product, Contact, Order, OrderUpdate
 
 from math import ceil
+import json
 # Create your views here.
 
 def index(request):
@@ -54,8 +55,26 @@ def contact(request):
 def contact_success(request):
     return render(request, 'shop/contact_success.html')
 
+from django.http import JsonResponse
+
 def tracker(request):
+    if request.method == "POST":
+        orderId = request.POST.get('orderId', '')
+        email = request.POST.get('email', '')
+        try:
+            order = Order.objects.filter(order_id=orderId, email=email)
+            if order.exists():
+                updates = OrderUpdate.objects.filter(order_id=orderId)
+                update_list = [{'text': item.update_desc, 'time': item.timestamp} for item in updates]
+                return JsonResponse(update_list, safe=False)  # Returns JSON response directly
+            else:
+                return JsonResponse([], safe=False)  # Returns empty list if no order found
+        except Exception as e:
+            print(f"Error in tracker view: {e}")
+            return JsonResponse([], safe=False)  # Returns empty list in case of an error
+
     return render(request, 'shop/tracker.html')
+
 
 def search(request):
     return render(request, 'shop/search.html')
@@ -78,6 +97,8 @@ def checkout(request):
         
         order=Order(items_json=items_json,name=name, email=email, phone=phone, address=address,city=city, state=state,zip_code=zip_code)
         order.save()
+        update= OrderUpdate(order_id= order.order_id, update_desc="The order has been placed")
+        update.save()
         thank=True
         id=order.order_id
         print(id)
