@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from .models import Product, Contact, Order, OrderUpdate
 
@@ -55,24 +55,36 @@ def contact(request):
 def contact_success(request):
     return render(request, 'shop/contact_success.html')
 
-from django.http import JsonResponse
 
 def tracker(request):
-    if request.method == "POST":
-        orderId = request.POST.get('orderId', '')
-        email = request.POST.get('email', '')
+    if request.method == 'POST':
+        orderId = request.POST.get('orderId')
+        email = request.POST.get('email')
+        
         try:
-            order = Order.objects.filter(order_id=orderId, email=email)
-            if order.exists():
-                updates = OrderUpdate.objects.filter(order_id=orderId)
-                update_list = [{'text': item.update_desc, 'time': item.timestamp} for item in updates]
-                return JsonResponse(update_list, safe=False)  # Returns JSON response directly
+            order = Order.objects.get(order_id=orderId, email=email)
+              # Parse `items_json` if it's a JSON string, else use it directly as a dictionary
+            if isinstance(order.items_json, str):  # If it's a JSON string
+                items_json_data = json.loads(order.items_json)
             else:
-                return JsonResponse([], safe=False)  # Returns empty list if no order found
+                items_json_data = order.items_json  # It's already a dictionary
+                
+            # Retrieve order updates from the OrderUpdate model based on order_id
+            updates = OrderUpdate.objects.filter(order_id=orderId)
+            
+              # Prepare the updates data as a list of dictionaries with 'text' and 'time'
+            
+            updates_data = [{'text': update.update_desc, 'time': update.timestamp} for update in updates]
+            
+            # Prepare the items data with quantity and name extracted from items_json_data
+            items_data = [{'qty': value[0], 'name': value[1]} for key, value in items_json_data.items()]
+            return JsonResponse({'updates': updates_data,'items_data': items_data})     # Return a JSON response with updates and items data
+            
+        except Order.DoesNotExist:
+            return JsonResponse({'error': 'Order not found with the provided ID and email.'})
         except Exception as e:
-            print(f"Error in tracker view: {e}")
-            return JsonResponse([], safe=False)  # Returns empty list in case of an error
-
+            return JsonResponse({'error': f'An error occurred: {str(e)}'})
+       
     return render(request, 'shop/tracker.html')
 
 
