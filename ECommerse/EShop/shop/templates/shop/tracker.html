@@ -21,6 +21,14 @@
         </form>    
     </div>
     <div class="col my-4">
+        <h2>Your Order Details</h2>
+        <div class="my-4">
+            <ul class="list-group" id="citems">
+            	
+            </ul>
+        </div>
+    </div>
+    <div class="col my-4">
         <h2>Your Order Status</h2>
         <div class="my-4">
             <ul class="list-group" id="items">
@@ -35,7 +43,8 @@
 <script>
     $('#trackerForm').submit(function(event) {
         event.preventDefault();  // Prevent the default form submission
-        $('#items').empty();  // Clear any previous results
+      //  $('#citems').empty();  //celar previous order details
+        $('#items').empty();  // Clear previous order status
     
         var formData = {
             'orderId': $('input[name=orderId]').val(),
@@ -50,21 +59,38 @@
             encode: true
         })
         .done(function(data) {
-            $('#items').empty();  // Clear previous items
-            if (data && data.length > 0) {
-                // Loop through the updates and display them in the list
-                data.forEach(function(update) {
-                    let text = update['text'];
-                    let time = update['time'];
-                    let listItem = `<li class="list-group-item d-flex justify-content-between align-items-center">
-                                        ${text}
-                                        <span class="badge badge-primary badge-pill">${time}</span>
-                                    </li>`;
-                    $('#items').append(listItem);
-                });
-            } else {
-                $('#items').append(`<li class="list-group-item">Sorry, no matching order found. Please check your Order ID and Email.</li>`);
-            }
+             // Handle error in response
+        if (data.error) {
+            $('#items').append(`<li class="list-group-item">${data.error}</li>`);
+            return;
+        }
+        //Populate the order status updates
+        var updates = data.updates;
+        if (updates.length > 0) {
+            updates.forEach(function(update) {
+                let text = update['text'];
+                let time = update['time'];
+                let listItem = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                    ${text}
+                                    <span class="badge badge-primary badge-pill">${time}</span>
+                                </li>`;
+                $('#items').append(listItem);
+            });
+        } else {
+            $('#items').append(`<li class="list-group-item">No updates available for this order.</li>`);
+        }
+            // Populate the order details
+        var cart = data.items_data;
+        for (let item of cart) {
+            let name = item.name;  // Access name directly from each item
+            let qty = item.qty;    // Access qty directly from each item
+            let cartItem = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${name}
+                                <span class="badge badge-primary badge-pill">${qty}</span>
+                            </li>`;
+            $('#citems').append(cartItem);
+        }    
+               
         })
         .fail(function() {
             $('#items').empty();
