@@ -5,6 +5,8 @@
           {
           display: inline-block;
           margin-left:-4px;
+          height: 407px; /* Fixed height for each carousel item container */
+          
           
           }
 
@@ -13,8 +15,26 @@
             height: 190px;
             
           }
-
-          
+          .card-img-top {
+            transition: transform 0.3s ease;
+        }
+        .card-img-top:hover {
+            transform: scale(1.05);
+        }
+        
+          .card {
+            height: 100%; /* Makes the card take full height of the container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        card-body {
+          flex-grow: 1; /* Allows the body to expand to fill available space */
+          height: 140px; /* Set a fixed height for the card body */
+          overflow: hidden; /* Optional: hides overflow content if text exceeds */
+          text-align: center;
+      }
+      
 
           .carousel-indicators .active {
           background-color: blue;
@@ -74,8 +94,8 @@
           <div class="card align-items-center" style="width: 18rem;">
             <img src='/media/{{i.image}}' class="card-img-top" alt="...">
             <div class="card-body">
-              <h5 class="card-title" id="namepr{{i.id}}">{{i.product_name|slice:"0:40"}}..</h5>
-              <p class="card-text">{{i.desc|slice:"0:53"}}...</p>
+              <h5 class="card-title" id="namepr{{i.id}}">{{i.product_name|slice:"0:40"}}...</h5>
+              <p class="card-text">{{i.desc|slice:"0:55"}}...</p>
               <h6 class="card-title" >Price : <span id="pricepr{{i.id}}">{{i.price}}</span></h6>
               <span id="divpr{{i.id}}" class="divpr">
               <button id="pr{{i.id}}" class="btn btn-primary cart">Add To Cart</button>
