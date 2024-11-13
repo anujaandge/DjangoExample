@@ -43,7 +43,7 @@
 <script>
     $('#trackerForm').submit(function(event) {
         event.preventDefault();  // Prevent the default form submission
-      //  $('#citems').empty();  //celar previous order details
+        $('#citems').empty();  //celar previous order details
         $('#items').empty();  // Clear previous order status
     
         var formData = {
@@ -62,6 +62,7 @@
              // Handle error in response
         if (data.error) {
             $('#items').append(`<li class="list-group-item">${data.error}</li>`);
+            $('#citems').append(`<li class="list-group-item">${data.error}</li>`);
             return;
         }
         //Populate the order status updates
