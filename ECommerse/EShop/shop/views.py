@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from .models import Product, Contact, Order, OrderUpdate
+from django.db.models import Q
 
 from math import ceil
 import json
@@ -86,10 +87,42 @@ def tracker(request):
             return JsonResponse({'error': f'An error occurred: {str(e)}'})
        
     return render(request, 'shop/tracker.html')
-
-
+    
 def search(request):
-    return render(request, 'shop/search.html')
+    query = request.GET.get('search')
+    allProds = []
+
+    # Check if query is valid
+    if not query or len(query) < 3:
+        params = {'allProds': allProds, 'msg': "Please make sure to enter a relevant search query (at least 3 characters)."}
+        return render(request, 'shop/search.html', params)
+
+     # Prepare variations of the query for broader matching
+    query_variations = [query, query.rstrip('s'), query + 's']
+
+    # Get all categories and filter products based on query
+    catProds = Product.objects.values('category', 'id')
+    cats = {item['category'] for item in catProds}
+    for cat in cats:
+        # Filter products within the category based on the search query and its variations
+        prod = Product.objects.filter(
+            Q(category=cat) &
+            (
+                Q(desc__icontains=query) | Q(desc__icontains=query_variations[1]) | Q(desc__icontains=query_variations[2]) |
+                Q(product_name__icontains=query) | Q(product_name__icontains=query_variations[1]) | Q(product_name__icontains=query_variations[2]) |
+                Q(category__icontains=query) | Q(category__icontains=query_variations[1]) | Q(category__icontains=query_variations[2])
+            )
+        )
+        n = prod.count()
+        nSlides = n // 4 + ceil((n / 4) - (n // 4))
+        
+        if n != 0:
+            allProds.append([prod, range(1, nSlides), nSlides])
+    params = {'allProds': allProds, 'msg': ""}
+    if not allProds:
+        params['msg'] = "No products match your search criteria."
+
+    return render(request, 'shop/search.html', params)        
 
 def productView(request, myid):
     product=Product.objects.filter(id=myid)
@@ -99,6 +132,7 @@ def productView(request, myid):
 def checkout(request):
     if request.method=="POST":
         items_json = request.POST.get('itemsJson', '')
+        amount=request.POST.get('amount','')
         name=request.POST.get('name','')
         email=request.POST.get('email','')
         address=request.POST.get('address1','') + request.POST.get(' address2','')
@@ -107,7 +141,7 @@ def checkout(request):
         zip_code=request.POST.get('zip_code','')
         phone=request.POST.get('phone','')
         
-        order=Order(items_json=items_json,name=name, email=email, phone=phone, address=address,city=city, state=state,zip_code=zip_code)
+        order=Order(items_json=items_json,name=name, email=email, phone=phone, address=address, city=city, state=state, zip_code=zip_code, amount=amount)
         order.save()
         update= OrderUpdate(order_id= order.order_id, update_desc="The order has been placed")
         update.save()
