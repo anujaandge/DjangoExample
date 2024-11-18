@@ -1,8 +1,15 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render
+from django.http import HttpResponse 
+from django.conf import settings
+from .models import Post
 
 # Create your views here.
 def blogHome(request):
-    return HttpResponse('This is home')
+    allPosts= Post.objects.all()
+    context={'allPosts': allPosts}
+    return render(request, "blog/blogHome.html", context)
 
 def blogPost(request, slug): 
-    return HttpResponse(f'This is blogPost : {slug}')
+    post=Post.objects.filter(slug=slug).first()
+    context={"post":post}
+    return render(request, "blog/blogPost.html", context)
