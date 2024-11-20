@@ -1,1 +1,1 @@
-Django version==5.1
+Django ==5.1
