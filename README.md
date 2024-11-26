@@ -67,3 +67,45 @@ Used for managing and retrieving real-time updates on customer orders. Each upda
    ```bash
    git clone https://github.com/your-username/Mayinsoft.com.git
    cd Mayinsoft.com
+
+2. **Create a Virtual Environment**  
+   Create and activate a virtual environment:  
+
+   - On macOS/Linux:  
+     ```bash
+     python3 -m venv env
+     source env/bin/activate
+     ```
+
+   - On Windows:  
+     ```bash
+     python -m venv env
+     env\Scripts\activate
+     ```
+3. **Install Dependencies**  
+   Install the required dependencies from the `requirements.txt` file:
+   ```bash
+   pip install -r requirements.txt
+4. **Setup Database**  
+   Apply database migrations to create the required tables:
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+5. **Create a Superuser**
+   Create an admin account to manage the application:
+   ```bash
+   python manage.py createsuperuser
+
+6. **Run the Development Server**
+   Start the Django development server:
+   ```bash
+   python manage.py runserver
+7. **Access the Application**
+   Open your browser and navigate to the application:
+   ```bash
+   http://127.0.0.1:8000/
+8. **Admin Panel**
+   Access the admin panel to manage the application backend:
+   ```bash
+    http://127.0.0.1:8000/admin
+  Use the superuser credentials created in Step 5.  
